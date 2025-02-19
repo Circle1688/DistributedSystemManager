@@ -199,7 +199,7 @@ class NodeManager(QMainWindow):
         ws = QWebSocket()
         node_item = QTreeWidgetItem([f"{ip}", "connect..."])
         self.tree.addTopLevelItem(node_item)
-
+        print(ip)
         node = {
             "ip": ip,
             "ws": ws,
@@ -212,7 +212,7 @@ class NodeManager(QMainWindow):
         ws.disconnected.connect(lambda: self.onDisconnected(ws))
         ws.textMessageReceived.connect(lambda msg: self.onMessageReceived(ws, msg))
         ws.open(QUrl(f"ws://{ip}:{PORT}"))
-
+        print(f"ws://{ip}:{PORT}")
         self.saveNodes()
 
 
