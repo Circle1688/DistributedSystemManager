@@ -190,7 +190,6 @@ class NodeManager(QMainWindow):
             self.connectToNode(ip)
 
     def connectToNode(self, ip):
-        print(ip)
         for node in self.nodes:
             if node["ip"] == ip:
                 QMessageBox.warning(self, "Warning", "This node already exists!!")
@@ -199,7 +198,6 @@ class NodeManager(QMainWindow):
         ws = QWebSocket()
         node_item = QTreeWidgetItem([f"{ip}", "connect..."])
         self.tree.addTopLevelItem(node_item)
-        print(ip)
         node = {
             "ip": ip,
             "ws": ws,
@@ -207,15 +205,10 @@ class NodeManager(QMainWindow):
             "programs": {}
         }
         self.nodes.append(node)
-        print(ip)
-        try:
-            ws.connected.connect(lambda: self.onConnected(ws))
-            ws.disconnected.connect(lambda: self.onDisconnected(ws))
-            ws.textMessageReceived.connect(lambda msg: self.onMessageReceived(ws, msg))
-            ws.open(QUrl(f"ws://{ip}:{PORT}"))
-        except Exception as e:
-            print(e)
-        print(f"ws://{ip}:{PORT}")
+        ws.connected.connect(lambda: self.onConnected(ws))
+        # ws.disconnected.connect(lambda: self.onDisconnected(ws))
+        ws.textMessageReceived.connect(lambda msg: self.onMessageReceived(ws, msg))
+        ws.open(QUrl(f"ws://{ip}:{PORT}"))
         self.saveNodes()
 
 
