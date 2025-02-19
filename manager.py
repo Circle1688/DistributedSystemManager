@@ -207,11 +207,14 @@ class NodeManager(QMainWindow):
             "programs": {}
         }
         self.nodes.append(node)
-
-        ws.connected.connect(lambda: self.onConnected(ws))
-        ws.disconnected.connect(lambda: self.onDisconnected(ws))
-        ws.textMessageReceived.connect(lambda msg: self.onMessageReceived(ws, msg))
-        ws.open(QUrl(f"ws://{ip}:{PORT}"))
+        print(ip)
+        try:
+            ws.connected.connect(lambda: self.onConnected(ws))
+            ws.disconnected.connect(lambda: self.onDisconnected(ws))
+            ws.textMessageReceived.connect(lambda msg: self.onMessageReceived(ws, msg))
+            ws.open(QUrl(f"ws://{ip}:{PORT}"))
+        except Exception as e:
+            print(e)
         print(f"ws://{ip}:{PORT}")
         self.saveNodes()
 
