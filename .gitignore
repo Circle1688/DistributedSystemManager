@@ -1,2 +1,4 @@
 .venv/
 status.json
+node_config.ini
+config.ini
