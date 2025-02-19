@@ -190,6 +190,7 @@ class NodeManager(QMainWindow):
             self.connectToNode(ip)
 
     def connectToNode(self, ip):
+        print(ip)
         for node in self.nodes:
             if node["ip"] == ip:
                 QMessageBox.warning(self, "Warning", "This node already exists!!")
