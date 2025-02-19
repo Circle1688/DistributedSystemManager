@@ -1,0 +1,20 @@
+[
+    {
+        "IP": "127.0.0.1",
+        "Status": "online",
+        "Process": [
+            {
+                "Process": "worker",
+                "Status": "stopped"
+            },
+            {
+                "Process": "upscale",
+                "Status": "stopped"
+            },
+            {
+                "Process": "facefusion",
+                "Status": "stopped"
+            }
+        ]
+    }
+]
