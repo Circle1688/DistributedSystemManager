@@ -129,7 +129,7 @@ class NodeServer:
                         "type": "status_update",
                         "programs": status
                     }))
-        except websockets.exceptions.ConnectionClosed:
+        except websockets.exceptions.ConnectionClosedOK:
             print("Connection closed")
 
     async def status_checker(self):
