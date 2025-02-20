@@ -14,7 +14,6 @@ class NodeServer:
         self.port = port
         self.programs = []
         self.processes = {}
-        self.connected_clients = set()
         self.load_config()
 
     def load_config(self):
@@ -86,7 +85,6 @@ class NodeServer:
 
     async def handler(self, websocket):
         try:
-            self.connected_clients.add(websocket)
             print("server connected")
 
             async for message in websocket:
@@ -99,6 +97,7 @@ class NodeServer:
                     }))
                 elif data["type"] == "start":
                     success = await self.start_program(data["program"])
+                    await asyncio.sleep(1)
                     status = await self.get_status()
                     await websocket.send(json.dumps({
                         "type": "status_update",
@@ -107,6 +106,7 @@ class NodeServer:
 
                 elif data["type"] == "stop":
                     success = await self.stop_program(data["program"])
+                    await asyncio.sleep(1)
                     status = await self.get_status()
                     await websocket.send(json.dumps({
                         "type": "status_update",
@@ -116,6 +116,7 @@ class NodeServer:
                 elif data["type"] == "start_all":
                     for prog in self.programs:
                         await self.start_program(prog["name"])
+                    await asyncio.sleep(1)
                     status = await self.get_status()
                     await websocket.send(json.dumps({
                         "type": "status_update",
@@ -124,33 +125,16 @@ class NodeServer:
                 elif data["type"] == "stop_all":
                     for name in list(self.processes.keys()):
                         await self.stop_program(name)
+                    await asyncio.sleep(1)
                     status = await self.get_status()
                     await websocket.send(json.dumps({
                         "type": "status_update",
                         "programs": status
                     }))
-        except websockets.exceptions.ConnectionClosedOK:
+        except websockets.exceptions.ConnectionClosed:
             print("Connection closed")
 
-    async def status_checker(self):
-        while True:
-            status = await self.get_status()
-
-            if self.connected_clients:
-                await asyncio.gather(
-                    *[client.send(json.dumps({
-                        "type": "status_update",
-                        "programs": status
-                    })) for client in self.connected_clients]
-                )
-
-            # 等待1秒
-            await asyncio.sleep(1)
-
     async def run(self):
-        # 启动状态检查任务
-        asyncio.create_task(self.status_checker())
-
         async with websockets.serve(self.handler, self.host, self.port):
             await asyncio.Future()
 

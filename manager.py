@@ -230,10 +230,11 @@ class NodeManager(QMainWindow):
     def onDisconnected(self, ws):
         for node in self.nodes:
             if node["ws"] == ws:
-                node["item"].setText(1, "offline")
-                for child in list(node["programs"].values()):
-                    node["item"].removeChild(child["item"])
-                node["programs"].clear()
+                if node["item"] is not None:
+                    node["item"].setText(1, "offline")
+                    for child in list(node["programs"].values()):
+                        node["item"].removeChild(child["item"])
+                    node["programs"].clear()
 
         for node in self.nodes:
             if node["ws"] == ws:
@@ -302,12 +303,18 @@ class NodeManager(QMainWindow):
             menu = QMenu()
             start_action = menu.addAction("Start all programs")
             stop_action = menu.addAction("Stop all programs")
+            start_node_action = menu.addAction("Start node")
+            stop_node_action = menu.addAction("Stop node")
 
             action = menu.exec(self.tree.viewport().mapToGlobal(position))
             if action == start_action:
                 self.controlAllProgramsOneNode(item, "start")
             elif action == stop_action:
                 self.controlAllProgramsOneNode(item, "stop")
+            elif action == start_node_action:
+                self.controlNode(item, "stop")
+            elif action == stop_node_action:
+                self.controlNode(item, "stop")
             return
 
         menu = QMenu()
@@ -319,6 +326,15 @@ class NodeManager(QMainWindow):
             self.controlProgram(item, "start")
         elif action == stop_action:
             self.controlProgram(item, "stop")
+
+
+    def controlNode(self, item, action):
+        remote_computer = item.text(0)
+        psexec_path = './PSTools/PsExec.exe'
+        command = 'notepad.exe'
+        psexec_command = [psexec_path, f'\\\\{remote_computer}', '-i', '-s', '-d', command]
+
+        result = subprocess.run(psexec_command, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
 
     def controlProgram(self, item, action):
