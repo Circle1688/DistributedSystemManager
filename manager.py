@@ -9,6 +9,7 @@ from PyQt6.QtWidgets import (QApplication, QMainWindow, QTreeWidget, QTreeWidget
                              QPushButton, QVBoxLayout, QWidget, QHBoxLayout,
                              QInputDialog, QMessageBox, QMenu, QStatusBar)
 from PyQt6.QtWebSockets import QWebSocket
+from PyQt6.QtNetwork import QNetworkProxy
 from PyQt6.QtCore import QUrl, Qt, QTimer, pyqtSignal, QObject, QThread
 
 PORT = 8888
@@ -196,6 +197,7 @@ class NodeManager(QMainWindow):
                 return
 
         ws = QWebSocket()
+        ws.setProxy(QNetworkProxy(QNetworkProxy.ProxyType.NoProxy))
         node_item = QTreeWidgetItem([f"{ip}", "connect..."])
         self.tree.addTopLevelItem(node_item)
         node = {
@@ -207,9 +209,13 @@ class NodeManager(QMainWindow):
         self.nodes.append(node)
         ws.connected.connect(lambda: self.onConnected(ws))
         ws.disconnected.connect(lambda: self.onDisconnected(ws))
+        ws.error.connect(self.on_error)
         ws.textMessageReceived.connect(lambda msg: self.onMessageReceived(ws, msg))
         ws.open(QUrl(f"ws://{ip}:{PORT}"))
         self.saveNodes()
+
+    def on_error(self, error):
+        print(f"Error: {error}")
 
 
     def connect_to_server(self, ws, ip):
@@ -229,12 +235,12 @@ class NodeManager(QMainWindow):
                     node["item"].removeChild(child["item"])
                 node["programs"].clear()
 
-        # for node in self.nodes:
-        #     if node["ws"] == ws:
-        #         ip = node["ip"]
-        #         break
+        for node in self.nodes:
+            if node["ws"] == ws:
+                ip = node["ip"]
+                break
 
-        # ws.open(QUrl(f"ws://{ip}:{PORT}"))
+        ws.open(QUrl(f"ws://{ip}:{PORT}"))
 
     def onMessageReceived(self, ws, message):
         try:
