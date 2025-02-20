@@ -206,7 +206,7 @@ class NodeManager(QMainWindow):
         }
         self.nodes.append(node)
         ws.connected.connect(lambda: self.onConnected(ws))
-        # ws.disconnected.connect(lambda: self.onDisconnected(ws))
+        ws.disconnected.connect(lambda: self.onDisconnected(ws))
         ws.textMessageReceived.connect(lambda msg: self.onMessageReceived(ws, msg))
         ws.open(QUrl(f"ws://{ip}:{PORT}"))
         self.saveNodes()
@@ -229,12 +229,12 @@ class NodeManager(QMainWindow):
                     node["item"].removeChild(child["item"])
                 node["programs"].clear()
 
-        for node in self.nodes:
-            if node["ws"] == ws:
-                ip = node["ip"]
-                break
+        # for node in self.nodes:
+        #     if node["ws"] == ws:
+        #         ip = node["ip"]
+        #         break
 
-        ws.open(QUrl(f"ws://{ip}:{PORT}"))
+        # ws.open(QUrl(f"ws://{ip}:{PORT}"))
 
     def onMessageReceived(self, ws, message):
         try:
