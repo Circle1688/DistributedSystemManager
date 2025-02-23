@@ -9,7 +9,7 @@ from PyQt6.QtWidgets import (QApplication, QMainWindow, QTreeWidget, QTreeWidget
                              QInputDialog, QMessageBox, QMenu, QStatusBar)
 from PyQt6.QtWebSockets import QWebSocket
 from PyQt6.QtNetwork import QNetworkProxy
-from PyQt6.QtCore import QUrl, Qt, QTimer, pyqtSignal, QObject, QThread
+from PyQt6.QtCore import QUrl, Qt, QTimer, pyqtSignal, QObject, QThread, QProcess
 
 PORT = 8888
 
@@ -45,6 +45,7 @@ class NodeManager(QMainWindow):
         self.nodes = []
         self.server_process = None
         self.server_path = ""
+        self.smd_folder_path = ""
         self.load_config()
 
         self.tree = QTreeWidget()
@@ -63,6 +64,9 @@ class NodeManager(QMainWindow):
         buttonLayout = QHBoxLayout()
         self.runServerBtn = QPushButton("Run server")
         self.stopServerBtn = QPushButton("Stop server")
+
+        self.smd_folder_Btn = QPushButton("Open smd folder")
+
         self.addBtn = QPushButton("Add node")
         self.delBtn = QPushButton("Delete node")
         self.startAllBtn = QPushButton("Start all nodes")
@@ -78,6 +82,8 @@ class NodeManager(QMainWindow):
 
         serverbuttonLayout.addWidget(self.runServerBtn)
         serverbuttonLayout.addWidget(self.stopServerBtn)
+
+        serverbuttonLayout.addWidget(self.smd_folder_Btn)
 
         # 树形列表
         self.tree.setHeaderLabels(["IP address", "status"])
@@ -95,6 +101,8 @@ class NodeManager(QMainWindow):
         self.runServerBtn.clicked.connect(self.start_server)
         self.stopServerBtn.clicked.connect(self.stop_server)
 
+        self.smd_folder_Btn.clicked.connect(self.open_smd_folder)
+
         self.addBtn.clicked.connect(self.addNode)
         self.delBtn.clicked.connect(self.deleteNode)
         self.startAllBtn.clicked.connect(self.startAllPrograms)
@@ -111,11 +119,17 @@ class NodeManager(QMainWindow):
         self.json_timer.start(2000)  # 每隔2秒触发一次
 
 
+    def open_smd_folder(self):
+        # 使用 QProcess 调用系统命令打开文件夹
+        QProcess.startDetached("explorer", [self.smd_folder_path])
+
+
     def load_config(self):
         config = configparser.ConfigParser()
         config.read("config.ini")
         if "default" in config:
             self.server_path = config["default"]["server"]
+            self.smd_folder_path = config["default"]["smd_path"]
 
     def export_tree_to_json(self):
         def get_item_data(item, is_root=True):
